@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+}
+
+group 'io.confluent'
+version '1.0.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://packages.confluent.io/maven/"
+    }
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation 'org.apache.kafka:connect-api:2.8.1'
+    implementation 'org.apache.kafka:connect-runtime:2.8.1'
+    implementation 'io.confluent:kafka-connect-storage-partitioner:10.0.12'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+allprojects {
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:deprecation"
+        }
+    }
+}
