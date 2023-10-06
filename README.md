@@ -18,7 +18,7 @@ The user of this transform is responsible for altering the topic schema to suppo
 
 ### Examples
 
-Assume the following configuration:
+Example 1
 
 ```json
 "transforms": "KeyToValue",
@@ -27,11 +27,12 @@ Assume the following configuration:
 "transforms.KeyToValue.msgField": "ip"
 ```
 
-Example 1
 * Message Before: `{ "country": "CZ", "city": "Prague" }`
 * Message After: `{ "ip": "192.168.1.1", "country": "CZ", "city": "Prague" }`
 * Key Before: `{"host": "192.168.1.1"}`
 * Key After: `{"host": "192.168.1.1"}`
+
+Example 2
 
 ```json
 "transforms": "KeyToValue",
@@ -41,7 +42,6 @@ Example 1
 "transforms.KeyToValue.dropKey": "true"
 ```
 
-Example 2
 * Message Before: `{ "country": "CZ", "city": "Prague" }`
 * Message After: `{ "ip": "192.168.1.1", "country": "CZ", "city": "Prague" }`
 * Key Before: `{"host": "192.168.1.1"}`
