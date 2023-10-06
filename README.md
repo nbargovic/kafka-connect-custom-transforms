@@ -3,7 +3,7 @@ Project of custom Kafka Connect transformations that extend the functions availa
 
 ### KeyToValue
 
-Copies a single record key field to the message value, allows for optionally renaming the field name and/or dropping the key.
+You dont like the key that a Source Connector creates, so you transformed it, and now you actually want the result in the value? This transform copies a single record key field to the message value (chain this transform if you need to move many fields out of a complex key). This also allows for optionally renaming the field name and/or dropping the key after the copy.
 
 This is the opposite of [ValueToKey](https://docs.confluent.io/platform/current/connect/transforms/valuetokey.html).
 The user of this transform is responsible for altering the topic schema to support any new message field names.
