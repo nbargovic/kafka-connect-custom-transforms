@@ -27,10 +27,10 @@ Example 1
 "transforms.KeyToValue.msgField": "ip"
 ```
 
-* Message Before: `{ "country": "CZ", "city": "Prague" }`
-* Message After: `{ "ip": "192.168.1.1", "country": "CZ", "city": "Prague" }`
 * Key Before: `{"host": "192.168.1.1"}`
+* Message Before: `{ "country": "CZ", "city": "Prague" }`
 * Key After: `{"host": "192.168.1.1"}`
+* Message After: `{ "ip": "192.168.1.1", "country": "CZ", "city": "Prague" }`
 
 Example 2
 
@@ -42,10 +42,10 @@ Example 2
 "transforms.KeyToValue.dropKey": "true"
 ```
 
-* Message Before: `{ "country": "CZ", "city": "Prague" }`
-* Message After: `{ "ip": "192.168.1.1", "country": "CZ", "city": "Prague" }`
 * Key Before: `{"host": "192.168.1.1"}`
+* Message Before: `{ "country": "CZ", "city": "Prague" }`
 * Key After: `null`
+* Message After: `{ "ip": "192.168.1.1", "country": "CZ", "city": "Prague" }`
 
 ---------
 
