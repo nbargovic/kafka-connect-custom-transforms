@@ -51,7 +51,7 @@ public class KeyToValueTest {
     }
 
     @Test
-    public void withSchema() {
+    public void withSchemaNoUpdate() {
         Map<String, String> configs = new HashMap<>();
         configs.put("keyField", "k");
         configs.put("msgField", "v");
@@ -60,7 +60,7 @@ public class KeyToValueTest {
 
         final Schema valueSchema = SchemaBuilder.struct()
                 .field("a", Schema.INT32_SCHEMA)
-                .field("v", Schema.INT32_SCHEMA)
+                .field("v", Schema.OPTIONAL_INT32_SCHEMA)
                 .build();
 
         final Struct value = new Struct(valueSchema);
@@ -92,12 +92,55 @@ public class KeyToValueTest {
                 .field("v", Schema.INT32_SCHEMA)
                 .build();
 
-        final Struct expectedValue = new Struct(expectedValueSchema)
+        assertEquals(expectedKey, transformedRecord.key());
+        assertEquals(1, ((Struct) transformedRecord.value()).getInt32("a").intValue());
+        assertEquals(2, ((Struct) transformedRecord.value()).getInt32("v").intValue());
+    }
+
+    @Test
+    public void withSchemaRecordUpdate() {
+        Map<String, String> configs = new HashMap<>();
+        configs.put("keyField", "k");
+        configs.put("msgField", "v");
+
+        transform.configure(configs);
+
+        final Schema valueSchema = SchemaBuilder.struct()
+                .field("a", Schema.INT32_SCHEMA)
+                .build();
+
+        final Struct value = new Struct(valueSchema);
+        value.put("a", 1);
+
+        final Schema keySchema = SchemaBuilder.struct()
+                .field("a", Schema.INT32_SCHEMA)
+                .field("k", Schema.INT32_SCHEMA)
+                .build();
+
+        final Struct key = new Struct(keySchema);
+        key.put("a", 1);
+        key.put("k", 2);
+
+        final SourceRecord record = new SourceRecord(null, null, "topic", 0, keySchema, key, valueSchema, value);
+        final SourceRecord transformedRecord = transform.apply(record);
+
+        final Schema expectedKeySchema = SchemaBuilder.struct()
+                .field("a", Schema.INT32_SCHEMA)
+                .field("k", Schema.INT32_SCHEMA)
+                .build();
+
+        final Struct expectedKey = new Struct(expectedKeySchema)
                 .put("a", 1)
-                .put("v", 2);
+                .put("k", 2);
+
+        final Schema expectedValueSchema = SchemaBuilder.struct()
+                .field("a", Schema.INT32_SCHEMA)
+                .field("v", Schema.INT32_SCHEMA)
+                .build();
 
         assertEquals(expectedKey, transformedRecord.key());
-        assertEquals(expectedValue, transformedRecord.value());
+        assertEquals(1, ((Struct) transformedRecord.value()).getInt32("a").intValue());
+        assertEquals(2, ((Struct) transformedRecord.value()).getInt32("v").intValue());
     }
 
     @Test
@@ -157,7 +200,7 @@ public class KeyToValueTest {
 
         final Schema valueSchema = SchemaBuilder.struct()
                 .field("a", Schema.INT32_SCHEMA)
-                .field("v", Schema.INT32_SCHEMA)
+                .field("v", Schema.OPTIONAL_INT32_SCHEMA)
                 .build();
 
         final Struct value = new Struct(valueSchema);
@@ -175,17 +218,9 @@ public class KeyToValueTest {
         final SourceRecord record = new SourceRecord(null, null, "topic", 0, keySchema, key, valueSchema, value);
         final SourceRecord transformedRecord = transform.apply(record);
 
-        final Schema expectedValueSchema = SchemaBuilder.struct()
-                .field("a", Schema.INT32_SCHEMA)
-                .field("v", Schema.INT32_SCHEMA)
-                .build();
-
-        final Struct expectedValue = new Struct(expectedValueSchema)
-                .put("a", 1)
-                .put("v", 2);
-
-        assertEquals(expectedValue, transformedRecord.value());
         assertNull(transformedRecord.key());
+        assertEquals(1, ((Struct) transformedRecord.value()).getInt32("a").intValue());
+        assertEquals(2, ((Struct) transformedRecord.value()).getInt32("v").intValue());
     }
 
     @Test

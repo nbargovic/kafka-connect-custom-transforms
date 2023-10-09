@@ -9,9 +9,11 @@ import org.apache.kafka.connect.components.Versioned;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.transforms.Transformation;
+import org.apache.kafka.connect.transforms.util.SchemaUtil;
 import org.apache.kafka.connect.transforms.util.SimpleConfig;
 
 import java.util.Map;
@@ -55,6 +57,7 @@ public class KeyToValue<R extends ConnectRecord<R>> implements Transformation<R>
 
     @Override
     public R apply(R record) {
+
         if (record.valueSchema() == null) {
             return applySchemaless(record);
         } else {
@@ -75,6 +78,7 @@ public class KeyToValue<R extends ConnectRecord<R>> implements Transformation<R>
         return record.newRecord(record.topic(), record.kafkaPartition(), null, key, null, value, record.timestamp());
     }
 
+    //this works like org.apache.kafka.connect.transforms.InsertField.applyWithSchema()
     private R applyWithSchema(R record) {
         final Struct value = requireStruct(record.value(), PURPOSE);
         final Struct key = requireStruct(record.key(), PURPOSE);
@@ -89,13 +93,29 @@ public class KeyToValue<R extends ConnectRecord<R>> implements Transformation<R>
             throw new DataException("Field does not exist in the key: " + keyField);
         }
 
-        value.put(msgField, key.get(keyField));
-
-        if(dropKey){
-            return record.newRecord(record.topic(), record.kafkaPartition(), null, null, valueSchema, value, record.timestamp());
+        //this updates the record schema.
+        //if you are using schema registry, the schema in registry will need to be compatible with this update
+        final Field fieldInValue = valueSchema.field(msgField);
+        if( fieldInValue == null ) {
+            final SchemaBuilder builder = SchemaUtil.copySchemaBasics(valueSchema, SchemaBuilder.struct());
+            for (Field field : valueSchema.fields()) {
+                builder.field(field.name(), field.schema());
+            }
+            valueSchema = builder.field(msgField, fieldFromKey.schema()).build();
         }
 
-        return record.newRecord(record.topic(), record.kafkaPartition(), keySchema, key, valueSchema, value, record.timestamp());
+        //insert the new field
+        final Struct updatedValue = new Struct(valueSchema);
+        for (Field field : value.schema().fields()) {
+            updatedValue.put(field.name(), value.get(field));
+        }
+        updatedValue.put(msgField, key.get(keyField));
+
+        if(dropKey){
+            return record.newRecord(record.topic(), record.kafkaPartition(), null, null, valueSchema, updatedValue, record.timestamp());
+        }
+
+        return record.newRecord(record.topic(), record.kafkaPartition(), keySchema, key, valueSchema, updatedValue, record.timestamp());
     }
 
     @Override
