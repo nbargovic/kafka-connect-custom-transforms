@@ -1,7 +1,7 @@
 # kafka-connect-custom-transforms
 Project of custom Kafka Connect transformations that extend the functions available in the Confluent built-in transforms
 
-### KeyToValue
+### Transform - KeyToValue
 
 You dont like the key that a Source Connector creates, so you transformed it, and now you actually want the result in the value? This transform copies a single record key field to the message value (chain this transform if you need to move many fields out of a complex key). This also allows for optionally renaming the field name and/or dropping the key after the copy.
 
@@ -49,10 +49,33 @@ Example 2
 
 ---------
 
+### Predicate - FieldValueIsIP
+Transformations can be configured with predicates so that the transformation is applied only to records which satisfy a condition. This predicate is intended to be used with the [Hostname Resolver Transformation](https://docs.confluent.io/kafka-connectors/syslog/current/hostname_resolver_transform.html). Use this predicate to only run the hostname transformation when the host is an unresolved IP address. This reduces the amount of reverse DNS lookups by skipping data that the hostname was already found inside the syslog message.
+
+### Configuration properties
+
+|Name|Description|Type|Default|Valid values|Importance|
+|---|---|---|---|---|---|
+|`field`|Field name in the record key to look for an IP address.|string|-|Any string (json field name)|HIGH
+|`useValue`|Optional boolean to use the message value instead of the key to search for an IP address.|boolean|false|Any string (json field name)|LOW
+
+### Examples
+
+Example 1
+
+```json
+"transforms": "hostname",
+"transforms.hostname.type": "io.confluent.connect.syslog.HostnameResolverTransformation"
+"transforms.hostname.predicate": "checkhost"
+"predicates": "checkhost"
+"predicates.checkhost.type": "io.confluent.kafka.connect.FieldIsIP"
+"predicates.checkhost.field": "host"
+```
+
 ### To Build:
 
 - Requires JDK 11 to build the jar
-- Run: `./gradle clean jar`
+- Run: `gradle clean jar`
 - Jar file will be generated in `./build/libs/kafka-connect-custom-transforms-1.0.0.jar`
 
 ### To Deploy:
