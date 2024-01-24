@@ -1,6 +1,7 @@
 package io.confluent.kafka.connect.predicates;
 
 import org.apache.kafka.common.config.ConfigDef;
+import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.transforms.predicates.Predicate;
 import org.apache.kafka.connect.connector.ConnectRecord;
@@ -14,6 +15,7 @@ import java.util.regex.Pattern;
 import java.util.Map;
 
 import static org.apache.kafka.connect.transforms.util.Requirements.requireMap;
+import static org.apache.kafka.connect.transforms.util.Requirements.requireStruct;
 
 public class FieldIsIP<R extends ConnectRecord<R>> implements Predicate<R> {
     private final Logger log = LoggerFactory.getLogger(FieldIsIP.class);
@@ -48,9 +50,16 @@ public class FieldIsIP<R extends ConnectRecord<R>> implements Predicate<R> {
     @Override
     public boolean test(R record) {
         log.debug("Running FieldIsIP predicate using message " + (useValue ? "value" : "key") + " and field name of  "+ fieldName +"'");
+
         try {
-            final Map<String, Object> value = useValue ? requireMap(record.value(), "") : requireMap(record.key(), "");
-            String dataValue = String.valueOf(value.get(fieldName));
+            String dataValue = "";
+            if ( useValue ? (record.valueSchema() == null) : (record.keySchema() == null) ) {
+                final Map<String, Object> value = useValue ? requireMap(record.value(), "") : requireMap(record.key(), "");
+                dataValue = String.valueOf(value.get(fieldName));
+            } else {
+                final Struct value = useValue ? requireStruct(record.value(), "") : requireStruct(record.key(), "");
+                dataValue = String.valueOf(value.get(fieldName));
+            }
             dataValue = dataValue.replaceAll("\"","");
             boolean isIP = isIPAddress(dataValue);
             log.debug("isIPAddress() returned "+ isIP +" for value: "+ dataValue);

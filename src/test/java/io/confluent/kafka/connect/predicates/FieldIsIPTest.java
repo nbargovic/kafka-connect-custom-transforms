@@ -1,5 +1,8 @@
 package io.confluent.kafka.connect.predicates;
 
+import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaBuilder;
+import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.junit.jupiter.api.Test;
 
@@ -173,5 +176,24 @@ public class FieldIsIPTest {
         final SourceRecord record = new SourceRecord(null, null, "topic", 0, null, null, null, null);
 
         assertFalse(predicate.test(record));
+    }
+
+    @Test
+    public void hasIPWithSchema() {
+        Map<String, String> configs = new HashMap<>();
+        configs.put("field", "host");
+        FieldIsIP predicate = new FieldIsIP();
+        predicate.configure(configs);
+
+        final Schema keySchema = SchemaBuilder.struct()
+                .field("host", Schema.STRING_SCHEMA)
+                .build();
+
+        final Struct key = new Struct(keySchema);
+        key.put("host", "192.168.1.1");
+
+        final SourceRecord record = new SourceRecord(null, null, "topic", 0, keySchema, key, null, null);
+
+        assertTrue(predicate.test(record));
     }
 }
