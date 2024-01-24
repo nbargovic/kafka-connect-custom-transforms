@@ -5,6 +5,9 @@ import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.transforms.predicates.Predicate;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.transforms.util.SimpleConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,6 +16,7 @@ import java.util.Map;
 import static org.apache.kafka.connect.transforms.util.Requirements.requireMap;
 
 public class FieldIsIP<R extends ConnectRecord<R>> implements Predicate<R> {
+    private final Logger log = LoggerFactory.getLogger(FieldIsIP.class);
 
     private static final String FIELD_CONFIG = "field";
     private static final String USE_VALUE_CONFIG = "useValue";
@@ -43,11 +47,16 @@ public class FieldIsIP<R extends ConnectRecord<R>> implements Predicate<R> {
 
     @Override
     public boolean test(R record) {
+        log.debug("Running FieldIsIP predicate using message " + (useValue ? "value" : "key") + " and field name of  "+ fieldName +"'");
         try {
             final Map<String, Object> value = useValue ? requireMap(record.value(), "") : requireMap(record.key(), "");
             String dataValue = String.valueOf(value.get(fieldName));
-            return isIPAddress(dataValue);
+            dataValue = dataValue.replaceAll("\"","");
+            boolean isIP = isIPAddress(dataValue);
+            log.debug("isIPAddress() returned "+ isIP +" for value: "+ dataValue);
+            return isIP;
         } catch (DataException ex) {
+            log.warn("Unable to get a field named '"+ fieldName +"' from the kafka message.", ex);
             return false;
         }
     }

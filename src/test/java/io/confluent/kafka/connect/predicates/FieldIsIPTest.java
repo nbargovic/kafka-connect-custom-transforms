@@ -18,11 +18,15 @@ public class FieldIsIPTest {
         FieldIsIP predicate = new FieldIsIP();
         predicate.configure(configs);
 
-        final HashMap<String, String> key = new HashMap<>();
+        HashMap<String, String> key = new HashMap<>();
         key.put("host", "192.168.1.1");
 
-        final SourceRecord record = new SourceRecord(null, null, "topic", 0, null, key, null, null);
+        SourceRecord record = new SourceRecord(null, null, "topic", 0, null, key, null, null);
 
+        assertTrue(predicate.test(record));
+
+        key.put("host", "\"192.168.1.1\"");
+        record = new SourceRecord(null, null, "topic", 0, null, key, null, null);
         assertTrue(predicate.test(record));
     }
 
@@ -91,13 +95,17 @@ public class FieldIsIPTest {
         FieldIsIP predicate = new FieldIsIP();
         predicate.configure(configs);
 
-        final HashMap<String, String> value = new HashMap<>();
+        HashMap<String, String> value = new HashMap<>();
         value.put("type", "UNKNOWN");
         value.put("host", "192.168.1.1");
         value.put("remoteAddress", "192.168.1.1");
 
-        final SourceRecord record = new SourceRecord(null, null, "topic", 0, null, null, null, value);
+        SourceRecord record = new SourceRecord(null, null, "topic", 0, null, null, null, value);
 
+        assertTrue(predicate.test(record));
+
+        value.put("host", "\"192.168.1.1\"");
+        record = new SourceRecord(null, null, "topic", 0, null, null, null, value);
         assertTrue(predicate.test(record));
     }
 
