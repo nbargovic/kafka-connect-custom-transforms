@@ -49,6 +49,64 @@ Example 2
 
 ---------
 
+### Transform - InsertUuid
+
+Kafka Connect SMT to add a random [UUID](https://docs.oracle.com/javase/7/docs/api/java/util/UUID.html)
+
+This SMT supports inserting a UUID into the record Value or Key. This is an extension of [cjmatta/kafka-connect-insert-uuid](https://github.com/cjmatta/kafka-connect-insert-uuid). With a patch to handle data that has a schema but sometimes receives null values in required fields. This has been found to happen with some connectors like SNMP Source Connector for example.
+
+### Configuration properties
+
+|Name|Description|Type|Default|Importance|
+
+|---|---|---|---|---|
+
+|`uuid.field.name`| Field name for UUID | String | `uuid` | High |
+
+### Example
+
+Example on how to add to your connector:
+
+```
+
+transforms=insertuuid
+
+transforms.insertuuid.type=io.confluent.kafka.connect.transforms.InsertUuid$Value
+
+transforms.insertuuid.uuid.field.name="uuid"
+
+```
+
+---------
+
+### Transform - InsertTimestamp
+
+Kafka Connect SMT to add an additional timesamp field to the kafka Value or Key.  This is different from the confluent SMT of insertField timestamp - because it uses current system time instead of copying the kafka message timestamp (from the message metadata).  This allows you to add a timestamp on both source and sink connectors.  Where the other insertField timestamp SMT only works on sink connectors.
+
+### Configuration properties
+
+|Name|Description|Type|Default|Importance|
+
+|---|---|---|---|---|
+
+|`ts.field.name`| Field name for the timestamp | Long | none | High |
+
+### Example
+
+Example on how to add to your connector:
+
+```
+
+transforms=inserttimestamp
+
+transforms.inserttimestamp.type=io.confluent.kafka.connect.transforms.InsertTimestamp$Value
+
+transforms.inserttimestamp.ts.field.name="il5-timestamp"
+
+```
+
+---------
+
 ### Predicate - FieldValueIsIP
 Transformations can be configured with predicates so that the transformation is applied only to records which satisfy a condition. This predicate is intended to be used with the [Hostname Resolver Transformation](https://docs.confluent.io/kafka-connectors/syslog/current/hostname_resolver_transform.html). Use this predicate to only run the hostname transformation when the host is an unresolved IP address. This reduces the amount of reverse DNS lookups by skipping data that the hostname was already found inside the syslog message.
 
