@@ -79,7 +79,9 @@ public abstract class InsertTimestamp<R extends ConnectRecord<R>> implements Tra
         final Struct updatedValue = new Struct(updatedSchema);
 
         for (Field field : value.schema().fields()) {
+          if ( value.get(field) != null ) {
             updatedValue.put(field.name(), value.get(field));
+          }
         }
 
         updatedValue.put(fieldName, System.currentTimeMillis());
