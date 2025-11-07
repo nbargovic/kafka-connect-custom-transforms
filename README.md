@@ -49,6 +49,40 @@ Example 2
 
 ---------
 
+### Transform - RegexRouter
+
+Route records to a different topic based on regex matching a field value. When the regex matches the specified field, records are routed to the configured topic. When there is no match, records are sent to the original topic defined in the connector configuration. This transform is useful for conditional topic routing based on message content such as log levels, environments, error codes, or any field that can be matched with a regular expression.
+
+### Configuration properties
+
+|Name|Description|Type|Default|Valid values|Importance|
+|---|---|---|---|---|---|
+|`field.name`|Field name in the record value to match against the regex.|string|-|Any string (json field name)|HIGH
+|`regex`|Regular expression pattern to match against the field value.|string|-|Any valid Java regex pattern|HIGH
+|`topic.name`|Target topic name to route records to when the regex matches.|string|-|Any valid topic name|HIGH
+
+### Examples
+
+Example 1 - Route XML content to a dedicated topic
+
+```json
+"transforms": "RouteXML",
+"transforms.RouteXML.type": "io.confluent.kafka.connect.transforms.RegexRouter",
+"transforms.RouteXML.field.name": "content",
+"transforms.RouteXML.regex": "<\\?xml.*\\?>.*",
+"transforms.RouteXML.topic.name": "xml-messages"
+```
+
+* Message: `{ "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><data>value</data>", "type": "document" }`
+* Original Topic: `raw-messages`
+* Routed Topic: `xml-messages` (matches regex)
+
+* Message: `{ "content": "{\"key\": \"value\"}", "type": "document" }`
+* Original Topic: `raw-messages`
+* Routed Topic: `raw-messages` (no match, keeps original)
+
+---------
+
 ### Transform - InsertUuid
 
 Kafka Connect SMT to add a random [UUID](https://docs.oracle.com/javase/7/docs/api/java/util/UUID.html)
