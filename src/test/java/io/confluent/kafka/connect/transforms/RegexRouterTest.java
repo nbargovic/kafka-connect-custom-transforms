@@ -242,7 +242,7 @@ public class RegexRouterTest {
     public void xmlHeaderRegexMatch() {
         final Map<String, String> props = new HashMap<>();
         props.put("field.name", "content");
-        props.put("regex", "<\\?xml.*\\?>.*");
+        props.put("regex", "<\\?xml.*\\?>");
         props.put("topic.name", "xml-messages");
 
         xform.configure(props);
@@ -261,7 +261,7 @@ public class RegexRouterTest {
     public void xmlHeaderRegexNoMatch() {
         final Map<String, String> props = new HashMap<>();
         props.put("field.name", "content");
-        props.put("regex", "<\\?xml.*\\?>.*");
+        props.put("regex", "<\\?xml.*\\?>");
         props.put("topic.name", "xml-messages");
 
         xform.configure(props);
@@ -280,7 +280,7 @@ public class RegexRouterTest {
     public void xmlHeaderRegexMatchWithSchema() {
         final Map<String, String> props = new HashMap<>();
         props.put("field.name", "content");
-        props.put("regex", "<\\?xml.*\\?>.*");
+        props.put("regex", "<\\?xml.*\\?>");
         props.put("topic.name", "xml-messages");
 
         xform.configure(props);
@@ -295,6 +295,25 @@ public class RegexRouterTest {
                 .put("type", "document");
 
         final SourceRecord record = new SourceRecord(null, null, "raw-messages", 0, null, null, schema, value);
+        final SourceRecord transformedRecord = xform.apply(record);
+
+        assertEquals("xml-messages", transformedRecord.topic());
+    }
+
+    @Test
+    public void xmlHeaderRegexMatchInMiddleOfContent() {
+        final Map<String, String> props = new HashMap<>();
+        props.put("field.name", "content");
+        props.put("regex", "<\\?xml.*\\?>");
+        props.put("topic.name", "xml-messages");
+
+        xform.configure(props);
+
+        final Map<String, Object> value = new HashMap<>();
+        value.put("content", "Some text before <?xml version=\"1.0\"?><data>value</data> and text after");
+        value.put("type", "document");
+
+        final SourceRecord record = new SourceRecord(null, null, "raw-messages", 0, null, null, null, value);
         final SourceRecord transformedRecord = xform.apply(record);
 
         assertEquals("xml-messages", transformedRecord.topic());

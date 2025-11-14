@@ -69,7 +69,7 @@ Example 1 - Route XML content to a dedicated topic
 "transforms": "RouteXML",
 "transforms.RouteXML.type": "io.confluent.kafka.connect.transforms.RegexRouter",
 "transforms.RouteXML.field.name": "content",
-"transforms.RouteXML.regex": "<\\?xml.*\\?>.*",
+"transforms.RouteXML.regex": "<\\?xml.*\\?>",
 "transforms.RouteXML.topic.name": "xml-messages"
 ```
 

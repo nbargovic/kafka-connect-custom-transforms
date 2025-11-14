@@ -66,8 +66,8 @@ public class RegexRouter<R extends ConnectRecord<R>> implements Transformation<R
         }
 
         String fieldValueStr = fieldValue.toString();
-        if (regex.matcher(fieldValueStr).matches()) {
-            // Regex matches, route to configured topic
+        if (regex.matcher(fieldValueStr).find()) {
+            // Regex found in field value, route to configured topic
             return record.newRecord(
                     topicName,
                     record.kafkaPartition(),
@@ -98,8 +98,8 @@ public class RegexRouter<R extends ConnectRecord<R>> implements Transformation<R
         }
 
         String fieldValueStr = fieldValue.toString();
-        if (regex.matcher(fieldValueStr).matches()) {
-            // Regex matches, route to configured topic
+        if (regex.matcher(fieldValueStr).find()) {
+            // Regex found in field value, route to configured topic
             return record.newRecord(
                     topicName,
                     record.kafkaPartition(),
