@@ -66,11 +66,11 @@ Route records to a different topic based on regex matching a field value. When t
 Example 1 - Route XML content to a dedicated topic
 
 ```json
-"transforms": "RouteXML",
-"transforms.RouteXML.type": "io.confluent.kafka.connect.transforms.RegexRouter",
-"transforms.RouteXML.field.name": "content",
-"transforms.RouteXML.regex": "<\\?xml.*\\?>",
-"transforms.RouteXML.topic.name": "xml-messages"
+"transforms": "routexml",
+"transforms.routexml.type": "io.confluent.kafka.connect.transforms.RegexRouter",
+"transforms.routexml.field.name": "content",
+"transforms.routexml.regex": "<\\?xml.*\\?>",
+"transforms.routexml.topic.name": "xml-messages"
 ```
 
 * Message: `{ "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><data>value</data>", "type": "document" }`
